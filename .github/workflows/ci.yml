@@ -1,0 +1,53 @@
+name: testes
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  testes:
+    runs-on: ${{ matrix.so }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        so: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # Dois solucionadores: um cobre sempre a primeira casa vazia, o outro a
+      # casa mais apertada, com outra estrutura de dados. O que tem de bater e
+      # a CONTAGEM de coberturas, nao so o sim ou nao.
+      - name: testes
+        run: dotnet test testes/Trominos.Testes/Trominos.Testes.csproj -c Release --nologo -v q
+
+      - name: todo retangulo ate 8 por 8, toda posicao de buraco
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- tabela
+
+      - name: onde a conta fecha e mesmo assim nao cobre
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- excecoes
+
+      - name: o teorema de Golomb de 1954
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- golomb
+
+      - name: quantas coberturas cada retangulo tem
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- coberturas
+
+      - name: o mapa de coberturas por posicao do buraco
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- mapa
+
+      - name: os dois solucionadores, posicao por posicao
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- juiz
+
+      - name: a primeira casa vazia contra a casa mais apertada
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- estrategias
+
+      - name: uma cobertura desenhada
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- desenho
